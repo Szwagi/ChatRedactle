@@ -99,7 +99,9 @@ function guessWords(words) {
         let elems = document.querySelectorAll(".word--" + w.stemmed);
         for (let e of elems) {
             e.classList.remove("redacted");
-            e.style.animation = 'flash 2s';
+            if (currentGameMode == "normal") {
+                e.style.animation = 'flash 2s';
+            }
             if (currentGameMode == "blink") {
                 e.classList.add("blink");
             }
@@ -121,14 +123,16 @@ function guessWords(words) {
             guessedWord.classList.add("guessed-word");
             guessedWord.innerText = `${w.unstemmed} (${elems.length})`;
             guessedWord.onclick = () => {
-                let elems = document.querySelectorAll(".word--" + w.stemmed);
-                if (elems.length > 0) {
-                    elems[0].scrollIntoView();
-                }
-                for (let e of elems) {
-                    e.style.animation = 'none';
-                    e.offsetHeight;
-                    e.style.animation = 'flash-manual 8s';
+                if (currentGameMode == 'normal') {
+                    let elems = document.querySelectorAll(".word--" + w.stemmed);
+                    if (elems.length > 0) {
+                        elems[0].scrollIntoView();
+                    }
+                    for (let e of elems) {
+                        e.style.animation = 'none';
+                        e.offsetHeight;
+                        e.style.animation = 'flash-manual 8s';
+                    }
                 }
             };
             domGuessedWords.prepend(guessedWord);
