@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri App</title>
+    <script type="module" src="/main.js" defer></script>
+  </head>
+  <body>
+    <nav>
+      <section>
+        <button type="button" id="give-up">Give Up</button>
+      </section>
+      <section>
+        <select id="wiki-list" class="disable-when-playing">
+          <option value="">Special:Random</option>
+        </select>
+        <button type="button" id="new-game">New Game</button>
+      </section>
+      <section>
+        <label>
+          <input type="radio" name="mode" value="normal" class="disable-when-playing" checked />
+          Normal
+        </label>
+        <label>
+          <input type="radio" name="mode" value="blink" class="disable-when-playing" />
+          Blink
+        </label>
+        <label>
+          <input type="radio" name="mode" value="blind" class="disable-when-playing" />
+          Blind
+        </label>
+      </section>
+      <section>
+        <label>
+          <input type="checkbox" id="auto-new-game">
+          Auto New Game
+        </label>
+      </section>
+      <section>
+        <input type="text" id="guess-textbox" placeholder="Enter a word...">
+        <button type="button" id="guess">Guess</button>
+      </section>
+    </nav>
+    <main>
+      <article id="article">
+        <h1>ChatRedactle</h1>
+        <p>
+          <b>ChatRedactle</b> is an interactive Twitch game where the chat tries to determine the subject of a random obfuscated Wikipedia article.
+        </p>
+        <p>
+          See the bar at the top? See where it says Special:Random? That's the list that the articles are picked from.
+          You can create your own lists by creating a .txt file with one topic per line in the /lists folder.
+        </p>
+        <p>
+          Normal, Blink, and Blind are modes. Select one if you want to know what they do.
+        </p>
+        <p>
+          By the way, if you couldn't tell, this whole game was bodged in a few hours. It's a mess.
+          It mostly works, but things might break, who knows. I will probably not fix issues unless it completely breaks.
+        </p>
+        <p>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/lIFE7h3m40U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </p>
+        </article>
+      <aside id="guessed-words"></aside>
+    </main>
+  </body>
+</html>
