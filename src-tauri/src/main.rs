@@ -26,25 +26,6 @@ struct Config {
 
 #[tokio::main]
 async fn main() -> tauri::Result<()> {
-    let path = Path::new(".").join("lists").join("Video Games");
-    let file = File::open(path).map_err(|e| e.to_string()).unwrap();
-    let reader = BufReader::new(file);
-    let lines: Vec<String> = reader.lines()
-        .flat_map(|l| l)
-        .filter(|l| l.trim().len() > 0)
-        .collect();
-
-    for it in lines {
-        let url = format!("https://en.wikipedia.org/w/api.php?prop=extracts&redirects&format=json&action=query&titles={it}");
-        let response = reqwest::get(url).await.unwrap().text().await.unwrap();
-        if response.contains("redirects") || response.contains("refer to:") || !response.contains("video game") {
-            println!("!!! {it}");
-        }
-    }
-
-    return Ok(());
-
-/*
     let config_file = File::open("config.json")?;
     let config: Config = serde_json::from_reader(config_file)?;
     tauri::Builder::default()
@@ -94,7 +75,6 @@ async fn main() -> tauri::Result<()> {
         .run(tauri::generate_context!())?;
 
     Ok(())
-    */
 }
 
 fn preprocess_wiki_text(text: &str, stemmer: &Stemmer, alphabet: &Alphabet) -> String {

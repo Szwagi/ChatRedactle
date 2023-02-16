@@ -119,6 +119,7 @@ article {
   width: calc(100vw - var(--aside-width));
   height: calc(100vh - var(--nav-height));
   padding: min(3%, 12px);
+  font-size: 1.2rem;
 
   background-color: #131516;
   font-family: "Fira Mono", "DejaVu Sans Mono", "Menlo", "Consolas", "Liberation Mono", "Monaco", "Lucida Console", monospace;
@@ -155,7 +156,6 @@ aside {
   padding: min(3%, 12px);
   z-index: 10001;
   box-shadow: var(--shadow);
-
   background-color: #1c1e1f;
 }
 
