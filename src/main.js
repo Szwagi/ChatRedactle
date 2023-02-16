@@ -1,5 +1,6 @@
 const { invoke } = window.__TAURI__.tauri;
 const { listen } = window.__TAURI__.event;
+const { appWindow } = window.__TAURI__.window;
 
 let domNewGame;
 let domWikiLists;
@@ -7,7 +8,6 @@ let domArticle;
 let domGuessTextbox;
 let domGuessedWords;
 let domAutoNewGame;
-let currentGameMode;
 let allowGuessing = false;
 let prevWords = new Set();
 let prevAutoNewGameTimeout;
@@ -31,25 +31,42 @@ listen('twitchwords', e => {
     }
 })
 
+
+function updateDisableWhenPlaying(val) {
+    let disableWhenPlaying = document.querySelectorAll(".disable-when-playing");
+    for (let e of disableWhenPlaying) {
+        e.disabled = val;
+    }
+}
+function updateDisableWhenNotPlaying(val) {
+    let disableWhenNotPlaying = document.querySelectorAll(".disable-when-not-playing");
+    for (let e of disableWhenNotPlaying) {
+        e.disabled = val;
+    }
+}
+
 async function startNewGame() {
     try {
+        if (allowGuessing) {
+            endGame(false);
+        }
+
         domNewGame.disabled = true;
         allowGuessing = false;
         clearTimeout(prevAutoNewGameTimeout);
 
-        let elems = document.querySelectorAll(".disable-when-playing");
-        for (let e of elems) {
-            e.disabled = true;
-        }
+        updateDisableWhenPlaying(true);
+
         domArticle.innerText = "Loading...";
         domGuessedWords.innerText = "";
         
         let list = domWikiLists.value.length != 0 ? domWikiLists.value : null;
-        currentGameMode = document.querySelector('input[name="mode"]:checked').value;
         prevWords.clear();
 
         let titleRaw = await fetchRandomWikiPageTitle(list);
         domArticle.innerHTML = await fetchWikiPageFromTitle(titleRaw);
+
+        updateDisableWhenNotPlaying(false);
 
         allowGuessing = true;
     }
@@ -74,10 +91,8 @@ function endGame(byGiveUp=false) {
         }, 8000);
     }
 
-    let elems = document.querySelectorAll(".disable-when-playing");
-    for (let e of elems) {
-        e.disabled = false;
-    }
+    updateDisableWhenPlaying(false);
+    updateDisableWhenNotPlaying(true);
 
     let redacted = document.querySelectorAll(".word");
     for (let e of redacted) {
@@ -99,44 +114,43 @@ function guessWords(words) {
         let elems = document.querySelectorAll(".word--" + w.stemmed);
         for (let e of elems) {
             e.classList.remove("redacted");
-            if (currentGameMode == "normal") {
-                e.style.animation = 'flash 2s';
-            }
-            if (currentGameMode == "blink") {
-                e.classList.add("blink");
-            }
-            else if (currentGameMode == "blind") {
-                e.classList.add("redacted-blind");
-            }
+            e.animate([
+                { background: "var(--accent)" },
+                { background: "transparent" }
+            ], {
+                duration: 2000,
+                iterations: 1
+            });
         }
 
         // Add word to the list of guessed words
+        let guessedWord = document.createElement("button");
+        
         if (elems.length == 0) {
-            let guessedWord = document.createElement("div");
-            guessedWord.classList.add("guessed-word");
-            guessedWord.classList.add("guessed-word-bad");
-            guessedWord.innerText = `${w.unstemmed}`;
-            domGuessedWords.prepend(guessedWord);
+            guessedWord.innerText = w.unstemmed;
+            guessedWord.disabled = true;
         }
         else {
-            let guessedWord = document.createElement("button");
-            guessedWord.classList.add("guessed-word");
             guessedWord.innerText = `${w.unstemmed} (${elems.length})`;
+            guessedWord.clickCounter = 0;
             guessedWord.onclick = () => {
-                if (currentGameMode == 'normal') {
-                    let elems = document.querySelectorAll(".word--" + w.stemmed);
-                    if (elems.length > 0) {
-                        elems[0].scrollIntoView();
-                    }
-                    for (let e of elems) {
-                        e.style.animation = 'none';
-                        e.offsetHeight;
-                        e.style.animation = 'flash-manual 8s';
-                    }
-                }
+                let elems = document.querySelectorAll(".word--" + w.stemmed);
+                if (elems.length == 0) return;//?
+
+                guessedWord.clickCounter++;
+                let e = elems[guessedWord.clickCounter % elems.length];
+
+                e.scrollIntoView();
+                e.animate([
+                    { background: "#a54221" },
+                    { background: "transparent" }
+                ], {
+                    duration: 2000,
+                    iterations: 1
+                });
             };
-            domGuessedWords.prepend(guessedWord);
         }
+        domGuessedWords.prepend(guessedWord);
     }
 
     // Check if we found the word...
@@ -177,9 +191,15 @@ window.addEventListener("DOMContentLoaded", async () => {
     domNewGame.addEventListener("click", startNewGame);
     domGiveUp.addEventListener("click", () => endGame(true));
     domGuess.addEventListener("click", localGuess);
-    domGuessTextbox.addEventListener("keydown", e => {
-        if (e.code == "Enter") {
+    domGuessTextbox.addEventListener("keypress", e => {
+        if (e.key == "Enter") {
             localGuess();
+        }
+    });
+
+    document.addEventListener('keyup', e => {
+        if (e.key == "F11") {
+            appWindow.setFullscreen(window.innerWidth != screen.width || window.innerHeight != screen.height);
         }
     });
 
@@ -192,5 +212,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    //startNewGame();
+    updateDisableWhenPlaying(false);
+    updateDisableWhenNotPlaying(true);
 });

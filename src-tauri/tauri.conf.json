@@ -17,9 +17,9 @@
         "all": false,
         "open": true
       },
-      "dialog": {
+      "window": {
         "all": false,
-        "message": true
+        "setFullscreen": true
       }
     },
     "bundle": {
